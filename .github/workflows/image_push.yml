@@ -37,7 +37,7 @@ jobs:
         with:
           change_path: "pkg/test"
       - name: release Version
-        id: dbversion
+        id: rversion
         uses: paulhatch/semantic-version@v4.0.2
         with:
           major_pattern: "(MAJOR-DB)"
