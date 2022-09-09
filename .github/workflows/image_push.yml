@@ -5,14 +5,15 @@ on:
       - 'releases/**'
 name: image_build
 jobs:
-  docker:
-    strategy:
-      matrix:
-        go-version: [1.16.x]
-        goos: [linux]
-        goarch: [amd64]
-    runs-on: ubuntu-latest
-    steps:
+  strategy:
+    matrix:
+      go-version: [1.17.x]
+      goos: [linux]
+      goarch:
+        - amd64
+        - arm64
+  runs-on: ubuntu-latest
+  steps:
     - name: Install go
       uses: actions/setup-go@v3
       with:
@@ -25,7 +26,26 @@ jobs:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
     - name: Packaging
-      run: tar -zcvf paddleflow-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz output/
+      run: tar -zcvf db-crud-api-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz output/
+    - name: Uploading assets
+      uses: actions/upload-artifact@v3
+      with:
+        name: db-crud-api-${{ matrix.goos }}-${{ matrix.goarch }}
+        path: db-crud-api-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+    - name: Application Version
+      id: version
+      uses: paulhatch/semantic-version@v4.0.2
+      with:
+        change_path: "pkg/test"
+    - name: release Version
+      id: dbversion
+      uses: paulhatch/semantic-version@v4.0.2
+      with:
+        major_pattern: "(MAJOR-DB)"
+        minor_pattern: "(MINOR-DB)"
+        change_path: "pkg/version"
+        namespace: db
+
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v4
