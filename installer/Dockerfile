@@ -15,5 +15,5 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/re
 WORKDIR /home/paddleflow
 COPY --from=building /building/output/bin/db-crud-api /home/paddleflow
 
-RUN adduser -g paddleflow paddleflow -D && chown -R paddleflow:paddleflow /home/paddleflow/server
+RUN adduser -g paddleflow paddleflow -D && chown -R paddleflow:paddleflow /home/paddleflow/db-crud-api
 USER paddleflow
