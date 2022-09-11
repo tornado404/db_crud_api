@@ -8,7 +8,7 @@ on:
 name: image_build
 
 env:
-  repository: db-crud-api
+  repository: zzc932/db-crud-api
 
 jobs:
   docker:
@@ -60,11 +60,10 @@ jobs:
 
       - name: Get Image Tag Name
         run: |
-          imageTag="${{ secrets.DOCKERHUB_USERNAME }}/$repository:"
           if [ ${{ steps.branch-name.outputs.is_tag }} ]; then
-            echo "tagname=$imageTag:${{ steps.branch-name.outputs.current_branch }}-latest,$imageTag:${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+            echo "tagname=$repository:${{ steps.branch-name.outputs.current_branch }}-latest,$repository:${{ github.event.inputs.tag }}" >> $GITHUB_ENV
           else
-            echo "tagname=$imageTag:${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
+            echo "tagname=$repository:${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
           fi
 
       - name: print Image Tag Name
