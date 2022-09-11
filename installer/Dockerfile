@@ -13,7 +13,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/re
     && apk del tzdata
 
 WORKDIR /home/paddleflow
-COPY --from=building /building/output/bin/db_crud_api /home/paddleflow
+COPY --from=building /building/output/bin/db-crud-api /home/paddleflow
 
 RUN adduser -g paddleflow paddleflow -D && chown -R paddleflow:paddleflow /home/paddleflow/server
 USER paddleflow
