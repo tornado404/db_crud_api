@@ -59,21 +59,21 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
-        if: ${{ env.TAG_NAME != '' }}
+        if: ${{ env.tagname != '' }}
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ./installer/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: TAG_NAME
+          tags: ${{ env.tagname }}
 
       - name: Build and push2
-        if: ${{ env.TAG_NAME == '' }}
+        if: ${{ env.tagname == '' }}
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ./installer/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: $TAG_NAME
+          tags: ${{ env.tagname }}
