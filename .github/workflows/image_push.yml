@@ -1,4 +1,6 @@
 on:
+  workflow_run:
+    workflows: ["Build"]
   push:
     branches:
       - master
@@ -19,55 +21,54 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Run build
-        run: make all
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-      - name: Packaging
-        run: tar -zcvf db-crud-api-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz output/
-      - name: Uploading assets
-        uses: actions/upload-artifact@v3
-        with:
-          name: db-crud-api-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: db-crud-api-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
-      - name: Application Version
-        id: version
-        uses: paulhatch/semantic-version@v4.0.2
-        with:
-          change_path: "pkg/test"
-      - name: release Version
-        id: rversion
-        uses: paulhatch/semantic-version@v4.0.2
-        with:
-          major_pattern: "(MAJOR-DB)"
-          minor_pattern: "(MINOR-DB)"
-          change_path: "pkg/version"
-          namespace: db
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          # list of Docker images to use as base name for tags
-          images: |
-            name/app
-            ghcr.io/username/app
-          # generate Docker tags based on the following events/attributes
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+
+      - name: GITHUB_REF
+        run: echo $GITHUB_REF
+
+      - name: Get $EVENT_CONTEXT
+        env:
+          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+        run: |
+          echo $EVENT_CONTEXT
+
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+
+      - name: Get Image Tag Name
+        run: |
+          if [ steps.branch-name.outputs.is_tag ]; then
+            echo "TAG_NAME=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          fi
+
+      - name: print Image Tag Name
+        run: |
+          echo ${{ env.TAG_NAME }}
+
       - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
+        if: ${{ github.event_name != 'pull_request' && steps.branch-name.outputs.is_tag == 'true' }}
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Build and push
+        if: ${{ github.event_name != 'pull_request' && steps.branch-name.outputs.is_tag == 'true' }}
         uses: docker/build-push-action@v3
         with:
           context: .
+          file: ./installer/Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          tags: ${{ steps.branch-name.outputs.tags }}
+          labels: ${{ steps.branch-name.outputs.labels }}
