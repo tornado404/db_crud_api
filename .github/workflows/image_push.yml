@@ -50,6 +50,10 @@ jobs:
         run: |
           echo "base_ref_branch=${{ steps.branch-name.outputs.base_ref_branch }}"
           echo "current_branch=${{ steps.branch-name.outputs.current_branch }}"
+          echo "default_branch=${{ steps.branch-name.outputs.default_branch }}"
+          echo "head_ref_branch=${{ steps.branch-name.outputs.head_ref_branch }}"
+          echo "is_default=${{ steps.branch-name.outputs.is_default }}"
+          echo "is_tag=${{ steps.branch-name.outputs.is_tag }}"
           echo "ref_branch=${{ steps.branch-name.outputs.ref_branch }}"
           echo "tag=${{ steps.branch-name.outputs.tag }}"
 
@@ -72,17 +76,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
-        if: ${{ env.tagname != '' }}
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./installer/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ env.tagname }}
-
-      - name: Build and push2
-        if: ${{ env.tagname == '' }}
         uses: docker/build-push-action@v3
         with:
           context: .
