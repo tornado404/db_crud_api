@@ -1,6 +1,4 @@
 on:
-  workflow_run:
-    workflows: ["Build"]
   push:
     branches:
       - master
