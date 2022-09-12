@@ -27,3 +27,69 @@ jobs:
       with:
         name: paddleflow-${{ matrix.goos }}-${{ matrix.goarch }}
         path: paddleflow-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+
+        - name: Get $EVENT_CONTEXT
+          env:
+            EVENT_CONTEXT: ${{ toJSON(github.event) }}
+          run: |
+            echo $EVENT_CONTEXT
+
+        - name: Get branch name
+          id: branch-name
+          with:
+            strip_tag_prefix: true
+          env:
+            strip_tag_prefix: true
+          uses: tj-actions/branch-names@v6
+
+        - name: echo branch
+          run: |
+            echo "base_ref_branch=${{ steps.branch-name.outputs.base_ref_branch }}"
+            echo "current_branch=${{ steps.branch-name.outputs.current_branch }}"
+            echo "default_branch=${{ steps.branch-name.outputs.default_branch }}"
+            echo "head_ref_branch=${{ steps.branch-name.outputs.head_ref_branch }}"
+            echo "is_default=${{ steps.branch-name.outputs.is_default }}"
+            echo "is_tag=${{ steps.branch-name.outputs.is_tag }}"
+            echo "ref_branch=${{ steps.branch-name.outputs.ref_branch }}"
+            echo "tag=${{ steps.branch-name.outputs.tag }}"
+
+
+        - name: Set Image Tag Name
+          run: |
+            base_img_tag=${{ steps.branch-name.outputs.current_branch }}
+            if [ $base_img_tag == 'master' ] || [ $base_img_tag == 'develop' ]; then
+              base_img_tag=alpha
+            fi
+            if [ !${{ steps.branch-name.outputs.is_tag }} ]; then
+              echo "current branch without tag"
+              echo "tagname=zzc932/db-crud-api:$base_img_tag-latest" >> $GITHUB_ENV
+            else
+              echo "tagname=zzc932/db-crud-api:$base_img_tag-latest,zzc932/db-crud-api:${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+            fi
+
+        - name: print Image Tag Name
+          run: |
+            echo ${{ env.tagname }}
+
+        - name: Login to DockerHub
+          if: github.event.label.name == 'image'
+          uses: docker/login-action@v2
+          env:
+            GOOS: ${{ matrix.goos }}
+            GOARCH: ${{ matrix.goarch }}
+          with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+        - name: Build and push
+          if: github.event.label.name == 'image'
+          uses: docker/build-push-action@v3
+          env:
+            GOOS: ${{ matrix.goos }}
+            GOARCH: ${{ matrix.goarch }}
+          with:
+            context: .
+            file: ./installer/Dockerfile
+            platforms: ${{ matrix.goarch }}
+            push: true
+            tags: ${{ env.tagname }}
