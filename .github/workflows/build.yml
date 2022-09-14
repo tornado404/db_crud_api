@@ -88,26 +88,35 @@ jobs:
 
 
     - name: Set Image Tag Name, only dev and release
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
       run: |
         echo "tagname=null" >> $GITHUB_ENV
+        current_branch=${{ steps.branch-name.outputs.current_branch }}
+        base_repo=zzc932/db-crud-api
+
+        if [ env.GOOS == 'arm.*' ]; then
+          base_repo=$base_repo-$env.GOOS
+        fi
+
         if [ !${{ steps.branch-name.outputs.is_tag }} ]; then
-          echo "current branch without tag"
-          if [ !${{ env.version_fragment == 'alpha' }} ]; then
-            echo "tagname=zzc932/db-crud-api:latest" >> $GITHUB_ENV
+          echo "current branch $current_branch without tag"
+          if [ ${{ env.version_fragment == 'alpha' }} ]; then
+            echo "tagname=:latest" >> $GITHUB_ENV
           fi
 
-          if [ ${{ steps.branch-name.outputs.current_branch }} == 'release.*' ]; then
-            echo "tagname=zzc932/db-crud-api:${{ steps.branch-name.outputs.current_branch }}" >> $GITHUB_ENV
+          if [ $current_branch == 'release.*' ]; then
+            echo "tagname=$base_repo:$current_branch" >> $GITHUB_ENV
           fi
 
         else
-          echo "tagname=zzc932/db-crud-api:${{ steps.branch-name.outputs.current_branch }},zzc932/db-crud-api:${{ steps.bump_version.outputs.next-version }}" >> $GITHUB_ENV
+          echo "tagname=$base_repo:$current_branch,$base_repo:${{ steps.bump_version.outputs.next-version }}" >> $GITHUB_ENV
         fi
-        echo ${{ env.tagname }}
-
+        echo "tagname is ${{ env.tagname }}"
 
     - name: Login to DockerHub
-      if: github.event.label.name == 'image'
+      if: env.tagname!='null'
       uses: docker/login-action@v2
       env:
         GOOS: ${{ matrix.goos }}
