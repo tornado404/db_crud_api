@@ -70,7 +70,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - if: IS_TAG
+    - if: $IS_TAG
       name: Bump release version
       id: bump_version
       uses: christian-draeger/increment-semantic-version@1.0.2
