@@ -54,19 +54,6 @@ jobs:
         echo "tag=${{ steps.branch-name.outputs.tag }}"
 
 
-    - name: Set Image Tag Name
-      run: |
-        base_img_tag=${{ steps.branch-name.outputs.current_branch }}
-        if [ $base_img_tag == 'master' ] || [ $base_img_tag == 'develop' ]; then
-          base_img_tag=alpha
-        fi
-        if [ !${{ steps.branch-name.outputs.is_tag }} ]; then
-          echo "current branch without tag"
-          echo "tagname=zzc932/db-crud-api:$base_img_tag-latest" >> $GITHUB_ENV
-        else
-          echo "tagname=zzc932/db-crud-api:$base_img_tag-latest,zzc932/db-crud-api:${{ github.event.inputs.tag }}" >> $GITHUB_ENV
-        fi
-
     - name: print Image Tag Name
       run: |
         echo ${{ env.tagname }}
@@ -81,8 +68,38 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - if: ${{ steps.branch-name.outputs.is_tag }}
+      name: Bump release version
+      id: bump_version
+      uses: christian-draeger/increment-semantic-version@1.0.2
+      with:
+        current-version: ${{ github.event.inputs.tag }}
+        version-fragment: ${{ env.base_img_tag }}
+    - if: ${{ steps.branch-name.outputs.is_tag }}
+      name: Do something with your bumped release version
+      run: echo ${{ steps.bump_version.outputs.next-version }}
+
+    - name: Set Image Tag Name
+      run: |
+        base_img_tag=${{ steps.branch-name.outputs.current_branch }}
+        if [ $base_img_tag == 'master' ] || [ $base_img_tag == 'develop' ]; then
+          echo "base_img_tag=alpha" >> $GITHUB_ENV
+          base_img_tag=alpha
+        fi
+
+        if [ $base_img_tag == 'release.*' ]; then
+          echo "base_img_tag=rc" >> $GITHUB_ENV
+        fi
+
+        if [ !${{ steps.branch-name.outputs.is_tag }} ]; then
+          echo "current branch without tag"
+          echo "tagname=zzc932/db-crud-api:$base_img_tag-latest" >> $GITHUB_ENV
+        else
+          echo "tagname=zzc932/db-crud-api:$base_img_tag-latest,zzc932/db-crud-api:${{ steps.bump_version.outputs.next-version }}" >> $GITHUB_ENV
+        fi
+
+
     - name: Build and push
-      if: github.event.label.name == 'image'
       uses: docker/build-push-action@v3
       env:
         GOOS: ${{ matrix.goos }}
@@ -93,18 +110,3 @@ jobs:
         platforms: ${{ matrix.goarch }}
         push: true
         tags: ${{ env.tagname }}
-
-    - name: Process version of the tag
-      if: steps.branch-name.outputs.is_tag
-      id: version
-      uses: ncipollo/semantic-version-action@v1
-    - name: Dump steps context
-      if: steps.branch-name.outputs.is_tag
-      env:
-        STEPS_CONTEXT: ${{ toJson(steps.version.outputs) }}
-      run: echo "$STEPS_CONTEXT"
-    - name: Dump previous tag
-      if: steps.branch-name.outputs.is_tag
-      env:
-        PREVIOUS_TAG: ${{ steps.version.outputs.previous_tag }}
-      run: echo "$PREVIOUS_TAG"
