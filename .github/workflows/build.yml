@@ -87,6 +87,7 @@ jobs:
 
 
     - name: Set Image Tag Name, only dev and release
+      if:  github.event_name == 'push'
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
@@ -117,7 +118,7 @@ jobs:
         fi
 
     - name: Login to DockerHub
-      if: env.tagname!='null'
+      if: env.tagname!='null' && github.event_name == 'push'
       uses: docker/login-action@v2
       env:
         GOOS: ${{ matrix.goos }}
@@ -127,7 +128,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and push
-      if: env.tagname!='null'
+      if: env.tagname!='null' && github.event_name == 'push'
       uses: docker/build-push-action@v3
       env:
         GOOS: ${{ matrix.goos }}
