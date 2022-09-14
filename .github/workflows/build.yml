@@ -95,7 +95,7 @@ jobs:
         current_branch=${{ steps.branch-name.outputs.current_branch }}
         base_repo=zzc932/db-crud-api
 
-        if [[ env.GOOS != amd.* ]]; then
+        if [[ !(env.GOOS =~ amd.*) ]]; then
           base_repo=$base_repo-${{ matrix.goarch }}
         fi
 

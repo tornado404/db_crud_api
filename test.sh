@@ -14,10 +14,3 @@ data=${data#*/}
 data=${data#*-}
 echo $data
 
-
-current_branch=release-1.3.1
-echo "version_fragment=alpha"
-
-if [[ $current_branch =~ release.* ]]; then
-  echo "version_fragment=rc"
-fi
