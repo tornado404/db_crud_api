@@ -117,7 +117,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and push
-      if env.tagname!='null'
+      if: env.tagname!='null'
       uses: docker/build-push-action@v3
       env:
         GOOS: ${{ matrix.goos }}
