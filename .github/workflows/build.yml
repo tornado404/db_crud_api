@@ -58,7 +58,7 @@ jobs:
         current_branch=${{ steps.branch-name.outputs.current_branch }}
         echo "version_fragment=alpha" >> $GITHUB_ENV
 
-        if [ $current_branch == 'release.*' ]; then
+        if [[ $current_branch == ^release.* ]]; then
           echo "version_fragment=rc" >> $GITHUB_ENV
 
           current_version=${$current_branch#*release}
@@ -106,7 +106,7 @@ jobs:
             echo "tagname=$base_repo:latest" >> $GITHUB_ENV
           fi
 
-          if [ $current_branch == 'release.*' ]; then
+          if [[ $current_branch == ^release.* ]]; then
             echo "tagname=$base_repo:$current_branch"
             echo "tagname=$base_repo:$current_branch" >> $GITHUB_ENV
           fi
