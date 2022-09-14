@@ -82,7 +82,7 @@ jobs:
         version-fragment: ${{ env.version_fragment }}
 
     - if: ${{ steps.branch-name.outputs.is_tag == 'true' }}
-      name: Do something with your bumped release version
+      name: print next-version
       run: echo ${{ steps.bump_version.outputs.next-version }}
 
 
