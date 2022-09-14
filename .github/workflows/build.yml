@@ -55,7 +55,7 @@ jobs:
 
 
     - name: print Image Tag Name
-      if: steps.branch-name.outputs.is_tag
+      if: ${{ steps.branch-name.outputs.is_tag == 'true' }}
       run: |
         echo "is_tag=${{ steps.branch-name.outputs.is_tag }}"
         echo "tag=${{ steps.branch-name.outputs.tag }}"
@@ -71,7 +71,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Bump release version
-      if: steps.branch-name.outputs.is_tag
+      if: ${{ steps.branch-name.outputs.is_tag == true }}
       id: bump_version
       uses: christian-draeger/increment-semantic-version@1.0.2
       env:
