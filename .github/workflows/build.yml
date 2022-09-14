@@ -96,7 +96,7 @@ jobs:
         base_repo=zzc932/db-crud-api
 
         if [[ env.GOOS != amd.* ]]; then
-          base_repo=$base_repo-$env.GOOS
+          base_repo=$base_repo-${{ matrix.goarch }}
         fi
 
         if [ !${{ steps.branch-name.outputs.is_tag }} ]; then
