@@ -61,7 +61,7 @@ jobs:
         if [[ $current_branch =~ ^release.* ]]; then
           echo "version_fragment=rc" >> $GITHUB_ENV
 
-          current_version=${$current_branch#*release}
+          current_version=${current_branch#*release}
           current_version=${current_version#*/}
           current_version=${current_version#*-}
           echo "current_version=$current_version" >> $GITHUB_ENV
