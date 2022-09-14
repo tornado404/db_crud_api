@@ -6,7 +6,7 @@ jobs:
       matrix:
         go-version: [1.16.x]
         goos: [linux]
-        goarch: [amd64, arm64]
+        goarch: [amd64, x86]
     runs-on: ubuntu-latest
     steps:
     - name: Install go
@@ -95,7 +95,7 @@ jobs:
         current_branch=${{ steps.branch-name.outputs.current_branch }}
         base_repo=zzc932/db-crud-api
 
-        if [ env.GOOS == 'arm.*' ]; then
+        if [[ env.GOOS != amd.* ]]; then
           base_repo=$base_repo-$env.GOOS
         fi
 
