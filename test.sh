@@ -4,6 +4,7 @@ a=ATEST
 b=BTEST
 c=CTEST
 
+
 data="release-1.4.2-rc1"
 # 字符替换
 data=$(echo  $data | sed -e 's/'${a}'/F/' -e 's/'${b}'/S/' -e 's/'${c}'/Y/')
