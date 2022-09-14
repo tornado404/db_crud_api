@@ -101,21 +101,20 @@ jobs:
 
         if [ !${{ steps.branch-name.outputs.is_tag }} ]; then
           echo "current branch $current_branch without tag"
-          if [ env.version_fragment == 'alpha' ]; then
+          if [ ${{ env.version_fragment }} == 'alpha' ]; then
+            echo "tagname=$base_repo:latest"
             echo "tagname=$base_repo:latest" >> $GITHUB_ENV
           fi
 
           if [ $current_branch == 'release.*' ]; then
+            echo "tagname=$base_repo:$current_branch"
             echo "tagname=$base_repo:$current_branch" >> $GITHUB_ENV
           fi
 
         else
+          echo "tagname=$base_repo:$current_branch,$base_repo:${{ steps.bump_version.outputs.next-version }}"
           echo "tagname=$base_repo:$current_branch,$base_repo:${{ steps.bump_version.outputs.next-version }}" >> $GITHUB_ENV
         fi
-
-    - name: print tagName
-      run: |
-        echo "tagname is ${{ env.tagname }}"
 
     - name: Login to DockerHub
       if: env.tagname!='null'
