@@ -94,9 +94,9 @@ jobs:
         echo "tagname=null" >> $GITHUB_ENV
         current_branch=${{ steps.branch-name.outputs.current_branch }}
         base_repo=zzc932/db-crud-api
-
-        if [[ !($env.GOARCH =~ amd.*) ]]; then
-          base_repo=$base_repo-${{ matrix.goarch }}
+        arch=${{ matrix.goarch }}
+        if [[ !($arch =~ amd.*) ]]; then
+          base_repo=$base_repo-$arch
         fi
 
         if [ !${{ steps.branch-name.outputs.is_tag }} ]; then
