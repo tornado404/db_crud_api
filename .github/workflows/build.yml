@@ -56,7 +56,8 @@ jobs:
 
     - name: print Image Tag Name
       run: |
-        echo ${{ env.tagname }}
+        echo ${{ steps.branch-name.outputs.is_tag }}
+        echo ${{ steps.branch-name.outputs.tag }}
 
     - name: Login to DockerHub
       if: github.event.label.name == 'image'
@@ -75,11 +76,15 @@ jobs:
       env:
         IS_TAG: ${{ steps.branch-name.outputs.is_tag }}
       with:
-        current-version: ${{ github.event.inputs.tag }}
+        current-version: ${{ steps.branch-name.outputs.tag }}
         version-fragment: ${{ env.base_img_tag }}
+
     - if: ${{ steps.branch-name.outputs.is_tag }}
       name: Do something with your bumped release version
       run: echo ${{ steps.bump_version.outputs.next-version }}
+
+
+
 
     - name: Set Image Tag Name
       run: |
@@ -99,6 +104,7 @@ jobs:
         else
           echo "tagname=zzc932/db-crud-api:$base_img_tag-latest,zzc932/db-crud-api:${{ steps.bump_version.outputs.next-version }}" >> $GITHUB_ENV
         fi
+        echo ${{ env.tagname }}
 
 
     - name: Build and push
