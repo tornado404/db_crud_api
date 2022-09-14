@@ -42,6 +42,11 @@ jobs:
         strip_tag_prefix: true
       uses: tj-actions/branch-names@v6
 
+    - uses: nelonoel/branch-name@v1.0.1
+    - run: |
+        echo ${BRANCH_NAME}
+        echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+
     - name: echo branch
       run: |
         echo "base_ref_branch=${{ steps.branch-name.outputs.base_ref_branch }}"
@@ -55,7 +60,7 @@ jobs:
 
     - name: get version-fragment and current-version
       run: |
-        current_branch=${{ steps.branch-name.outputs.current_branch }}
+        current_branch=${{ env.BRANCH_NAME }}
         echo "version_fragment=alpha" >> $GITHUB_ENV
 
         if [[ $current_branch =~ ^release.* ]]; then
@@ -93,7 +98,7 @@ jobs:
         GOARCH: ${{ matrix.goarch }}
       run: |
         echo "tagname=null" >> $GITHUB_ENV
-        current_branch=${{ steps.branch-name.outputs.current_branch }}
+        current_branch=${{ env.BRANCH_NAME }}
         base_repo=zzc932/db-crud-api
         arch=${{ matrix.goarch }}
         if [[ !($arch =~ amd.*) ]]; then
