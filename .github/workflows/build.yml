@@ -28,12 +28,6 @@ jobs:
         name: paddleflow-${{ matrix.goos }}-${{ matrix.goarch }}
         path: paddleflow-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
 
-    - name: Get $EVENT_CONTEXT
-      env:
-        EVENT_CONTEXT: ${{ toJSON(github.event) }}
-      run: |
-        echo $EVENT_CONTEXT
-
     - name: Get branch name
       id: branch-name
       with:
@@ -42,27 +36,34 @@ jobs:
         strip_tag_prefix: true
       uses: tj-actions/branch-names@v6
 
+    - name: echo branch
+      run: |
+        echo "is_default=${{ steps.branch-name.outputs.is_default }}"
+        echo "is_tag=${{ steps.branch-name.outputs.is_tag }}"
+        echo "tag=${{ steps.branch-name.outputs.tag }}"
+
     - uses: nelonoel/branch-name@v1.0.1
     - run: |
         echo ${BRANCH_NAME}
         echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
 
-    - name: echo branch
-      run: |
-        echo "base_ref_branch=${{ steps.branch-name.outputs.base_ref_branch }}"
-        echo "current_branch=${{ steps.branch-name.outputs.current_branch }}"
-        echo "default_branch=${{ steps.branch-name.outputs.default_branch }}"
-        echo "head_ref_branch=${{ steps.branch-name.outputs.head_ref_branch }}"
-        echo "is_default=${{ steps.branch-name.outputs.is_default }}"
-        echo "is_tag=${{ steps.branch-name.outputs.is_tag }}"
-        echo "ref_branch=${{ steps.branch-name.outputs.ref_branch }}"
-        echo "tag=${{ steps.branch-name.outputs.tag }}"
-
-    - name: get version-fragment and current-version
+    - name: get build-image-enabled, version-fragment and current-version
       run: |
         current_branch=${{ env.BRANCH_NAME }}
-        echo "version_fragment=alpha" >> $GITHUB_ENV
 
+        build_image_enabled=false
+        if [[ $current_branch =~ ^(release|dev|master|main).* ]]; then
+          echo "$current_branch"
+          if [[ github.event_name == 'push' ]]; then
+            echo "$github.event_name"
+            build_image_enabled=true
+          fi
+        fi
+
+        echo "build_image_enabled=$build_image_enabled"
+        echo "build_image_enabled=$build_image_enabled" >> $GITHUB_ENV
+
+        echo "version_fragment=alpha" >> $GITHUB_ENV
         if [[ $current_branch =~ ^release.* ]]; then
           echo "version_fragment=rc" >> $GITHUB_ENV
 
@@ -79,20 +80,20 @@ jobs:
         fi
 
     - name: Bump release version
-      if: ${{ steps.branch-name.outputs.is_tag == 'true' }}
+      if: ${{ steps.branch-name.outputs.is_tag == 'true' && env.build_image_enabled=='true' }}
       id: bump_version
       uses: christian-draeger/increment-semantic-version@1.0.2
       with:
         current-version: ${{ env.current_version }}
         version-fragment: ${{ env.version_fragment }}
 
-    - if: ${{ steps.branch-name.outputs.is_tag == 'true' }}
+    - if: ${{ steps.branch-name.outputs.is_tag == 'true' && env.build_image_enabled=='true' }}
       name: print next-version
       run: echo ${{ steps.bump_version.outputs.next-version }}
 
 
     - name: Set Image Tag Name, only dev and release
-      if:  github.event_name == 'push'
+      if: env.build_image_enabled=='true'
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
@@ -123,7 +124,7 @@ jobs:
         fi
 
     - name: Login to DockerHub
-      if: env.tagname!='null' && github.event_name == 'push'
+      if: env.tagname!='null' && env.build_image_enabled=='true'
       uses: docker/login-action@v2
       env:
         GOOS: ${{ matrix.goos }}
@@ -133,7 +134,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and push
-      if: env.tagname!='null' && github.event_name == 'push'
+      if: env.tagname!='null' && env.build_image_enabled=='true'
       uses: docker/build-push-action@v3
       env:
         GOOS: ${{ matrix.goos }}
