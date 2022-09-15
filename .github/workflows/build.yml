@@ -52,8 +52,12 @@ jobs:
         current_branch=${{ env.BRANCH_NAME }}
 
         build_image_enabled=false
-        if [[ $current_branch =~ ^(release|dev|master|main).* && github.event_name == 'push' ]]; then
-          build_image_enabled=true
+        if [[ $current_branch =~ ^(release|dev|master|main).* ]]; then
+          echo "$current_branch"
+          if [[ github.event_name == 'push' ]]; then
+            echo "$github.event_name"
+            build_image_enabled=true
+          fi
         fi
 
         echo "build_image_enabled=$build_image_enabled"
