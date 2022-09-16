@@ -50,17 +50,17 @@ jobs:
     - name: get build-image-enabled, version-fragment and current-version
       run: |
         current_branch=${{ env.BRANCH_NAME }}
-
+        event_name=${{ github.event_name }}
         build_image_enabled=false
-        if [[ $current_branch =~ ^(release|dev|master|main).* ]]; then
-          echo "$current_branch"
-          if [[ github.event_name == 'push' ]]; then
-            echo "$github.event_name"
-            build_image_enabled=true
+        if [[ $current_branch =~ ^(release|dev|master|main).* ]];then
+          echo "current_branch is [$current_branch]"
+          if [[ $event_name == 'push' ]]; then
+          echo "event_name is [$event_name]"
+          build_image_enabled=true
           fi
         fi
 
-        echo "build_image_enabled=$build_image_enabled"
+        echo "build_image_enabled: [$build_image_enabled]"
         echo "build_image_enabled=$build_image_enabled" >> $GITHUB_ENV
 
         echo "version_fragment=alpha" >> $GITHUB_ENV

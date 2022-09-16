@@ -1,16 +1,29 @@
-#!/bin/bash
+#!/bin/sh
 
-a=ATEST
-b=BTEST
-c=CTEST
+current_branch=release-1.4.1
+event_name=push
+is_tag=false
+GITHUB_ENV=""
 
-data="release-1.4.2-rc1"
-# 字符替换
-data=$(echo  $data | sed -e 's/'${a}'/F/' -e 's/'${b}'/S/' -e 's/'${c}'/Y/')
-# data=${data/${delay} ${unkown}/F S}
-echo $data
-data=${data#*release}
-data=${data#*/}
-data=${data#*-}
-echo $data
+build_image_enabled=false
+if [[ $current_branch =~ ^(release|dev|master|main).* ]];then
+  echo "current_branch is $current_branch"
+  if [[ $event_name == 'push' ]]; then
+    echo "event_name is $event_name"
+    build_image_enabled=true
+  fi
+fi
+
+echo "build_image_enabled=$build_image_enabled"
+# echo "build_image_enabled=$build_image_enabled" >> $GITHUB_ENV
+
+echo "version_fragment=alpha" >> $GITHUB_ENV
+if [[ $current_branch =~ ^release.* ]]; then
+  echo "version_fragment=rc"
+
+  current_version=${current_branch#*release}
+  current_version=${current_version#*/}
+  current_version=${current_version#*-}
+  echo "current_version=$current_version"
+fi
 
