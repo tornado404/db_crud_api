@@ -52,7 +52,7 @@ jobs:
         current_branch=${{ env.BRANCH_NAME }}
         event_name=${{ github.event_name }}
         build_image_enabled=false
-        echo "current_branch=[$current_branch]"
+        echo "current_branch is [$current_branch]"
         if [[ $current_branch =~ ^(release|dev|master|main).* ]];then
           echo "current_branch is [$current_branch]"
           if [[ $event_name == 'push' ]]; then
@@ -61,7 +61,7 @@ jobs:
           fi
         fi
 
-        echo "build_image_enabled: [$build_image_enabled]"
+        echo "build_image_enabled is [$build_image_enabled]"
         echo "build_image_enabled=$build_image_enabled" >> $GITHUB_ENV
 
         echo "version_fragment=alpha" >> $GITHUB_ENV
@@ -71,24 +71,27 @@ jobs:
           current_version=${current_branch#*release}
           current_version=${current_version#*/}
           current_version=${current_version#*-}
+          echo "current_version is [$current_version]"
           echo "current_version=$current_version" >> $GITHUB_ENV
         fi
 
         if [ !${{ steps.branch-name.outputs.is_tag }} ]; then
           echo "current branch without tag"
+          echo "current_version=null" >> $GITHUB_ENV
         else
+          echo "current_version is [$steps.branch-name.outputs.tag]"
           echo "current_version=$steps.branch-name.outputs.tag" >> $GITHUB_ENV
         fi
 
     - name: Bump release version
-      if: ${{ steps.branch-name.outputs.is_tag == 'true' && env.build_image_enabled=='true' }}
+      if: ${{ env.current_version != 'null' && env.build_image_enabled=='true' }}
       id: bump_version
       uses: christian-draeger/increment-semantic-version@1.0.2
       with:
         current-version: ${{ env.current_version }}
         version-fragment: ${{ env.version_fragment }}
 
-    - if: ${{ steps.branch-name.outputs.is_tag == 'true' && env.build_image_enabled=='true' }}
+    - if: ${{ env.current_version != 'null' && env.build_image_enabled=='true' }}
       name: print next-version
       run: echo ${{ steps.bump_version.outputs.next-version }}
 
