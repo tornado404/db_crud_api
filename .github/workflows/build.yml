@@ -41,6 +41,20 @@ jobs:
       run: |
         echo "is_tag=${{ steps.branch-name.outputs.is_tag }}"
         echo "tag=${{ steps.branch-name.outputs.tag }}"
+    - name: echo branch
+      run: |
+        echo "is_tag=${{ steps.branch-name.outputs.is_tag }}"
+        echo "tag=${{ steps.branch-name.outputs.tag }}"
+
+    - name: Git Tag Based Build Version
+      id: happygears
+      uses: happygears/gt2v@v2
+    - name: print happygears Tag
+      env:
+        EVENT_CONTEXT: ${{ toJSON(steps.happygears.outputs) }}
+      run: |
+        echo $EVENT_CONTEXT
+
 
     # 获取当前分支名称
     - uses: nelonoel/branch-name@v1.0.1
