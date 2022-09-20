@@ -102,9 +102,9 @@ jobs:
         echo "next_version=null" >> $GITHUB_ENV
 
     # 由于大版本号几乎不会变动,我们将大版本号设置为默认值,{major}.{minor}.{patch}.{micro_patch}
-    - name: split cur_version, such as 1.4.3 becomes 4.3
-      if: env.cur_version!='null'
-      run: |
+#    - name: split cur_version, such as 1.4.3 becomes 4.3
+#      if: env.cur_version!='null'
+#      run: |
 
     - name: Process version of the tag
       id: version
