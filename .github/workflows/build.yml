@@ -77,7 +77,6 @@ jobs:
 
         if [ !${{ steps.branch-name.outputs.is_tag }} ]; then
           echo "current branch without tag"
-          echo "cur_version=null" >> $GITHUB_ENV
         else
           echo "cur_version is [$steps.branch-name.outputs.tag]"
           echo "cur_version=$steps.branch-name.outputs.tag" >> $GITHUB_ENV
@@ -96,7 +95,7 @@ jobs:
         echo "abc is [$abc]"
 
     - name: Bump release version
-      if: env.cur_version!=0 && env.build_image_enabled=='true'
+      if: env.cur_version!='null' && env.build_image_enabled=='true'
       id: bump_version
       uses: christian-draeger/increment-semantic-version@1.0.2
       with:
