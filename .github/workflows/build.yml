@@ -130,7 +130,7 @@ jobs:
       env:
         major: ${{ steps.version.outputs.major }}
       run: |
-        nextversion=${{ steps.version.outputs.major }}.${{ steps.bump_version.outputs.next-version }}
+        nextversion=${{ steps.bump_version.outputs.next-version }}
         echo "nextversion is [$nextversion]"
         echo "next_version=$nextversion" >> $GITHUB_ENV
 
