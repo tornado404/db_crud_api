@@ -83,6 +83,12 @@ jobs:
           echo "current_version=$steps.branch-name.outputs.tag" >> $GITHUB_ENV
         fi
 
+    - name: test current_version
+      if: env.current_version!='null'
+      run: |
+        echo "current_version is [${{ env.current_version }}]"
+        echo "build_image_enabled is [${{ env.build_image_enabled }}]"
+
     - name: Bump release version
       if: env.current_version!='null' && env.build_image_enabled=='true'
       id: bump_version
