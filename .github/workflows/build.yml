@@ -117,7 +117,7 @@ jobs:
           base_repo=$base_repo-$arch
         fi
 
-        echo "nextversion is [$nextversion]"
+        echo "nextversion is [${{ env.next_version }}]"
         if [[ env.next_version=='null' ]]; then
           echo "current branch $current_branch without tag"
           if [ ${{ env.version_fragment }} == 'alpha' ]; then
