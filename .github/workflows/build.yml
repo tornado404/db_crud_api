@@ -119,7 +119,7 @@ jobs:
 
         nextversion=${{ env.next_version }}
         echo "nextversion is [$nextversion]"
-        if [[ $nextversion=='null' ]]; then
+        if [[ $nextversion == 'null' ]]; then
           echo "current branch $current_branch without tag"
           if [ ${{ env.version_fragment }} == 'alpha' ]; then
             echo "tagname=$base_repo:latest"
