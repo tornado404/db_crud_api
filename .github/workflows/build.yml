@@ -54,9 +54,9 @@ jobs:
         EVENT_CONTEXT: ${{ toJSON(steps.happygears.outputs) }}
       run: |
         echo $EVENT_CONTEXT
-        echo "git_commits_since_tag= [${{ env.git_commits_since_tag }}]"
-        echo "git_commits_since_tag= [${{ steps.happygears.outputs.git_commits_since_tag }}]"
-        echo "git_commits_since_tag=${{ steps.happygears.outputs.git_commits_since_tag }}" >> $GITHUB_ENV
+        git_commits_since_tag=${{ steps.happygears.outputs.git_commits_since_tag }}
+        echo "git_commits_since_tag= [$git_commits_since_tag]"
+        echo "git_commits_since_tag=$git_commits_since_tag" >> $GITHUB_ENV
 
     # 获取当前分支名称
     - uses: nelonoel/branch-name@v1.0.1
@@ -101,13 +101,30 @@ jobs:
         fi
         echo "next_version=null" >> $GITHUB_ENV
 
+    # 由于大版本号几乎不会变动,我们将大版本号设置为默认值,{major}.{minor}.{patch}.{micro_patch}
+    - name: split cur_version, such as 1.4.3 becomes 4.3
+      if: env.cur_version!='null'
+      run: |
+
+    - name: Process version of the tag
+      id: version
+      uses: ncipollo/semantic-version-action@v1
+      with:
+        tag: ${{ env.cur_version }}.${{ env.git_commits_since_tag }}
+
+
     # 计算下一个版本号
     - name: Bump release version
       if: env.cur_version!='null' && env.build_image_enabled=='true'
       id: bump_version
       uses: christian-draeger/increment-semantic-version@1.0.2
+      env:
+        major: ${{ steps.version.outputs.major }}
+        minor: ${{ steps.version.outputs.minor }}
+        patch: ${{ steps.version.outputs.patch }}
+        micro_patch: ${{ steps.version.micro_patch.major }}
       with:
-        current-version: ${{ env.cur_version }}.${{ env.git_commits_since_tag }}
+        current-version: ${{ env.major }}.${{ env.minor }}.${{ env.patch }}.${{ env.micro_patch }}
         version-fragment: ${{ env.version_fragment }}
 
     # 打印下一个版本号
