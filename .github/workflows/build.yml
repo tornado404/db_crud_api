@@ -84,7 +84,7 @@ jobs:
         fi
 
     - name: Bump release version
-      if: ${{ env.current_version != 'null' && env.build_image_enabled=='true' }}
+      if: ${{ !(env.current_version == 'null') && env.build_image_enabled=='true' }}
       id: bump_version
       uses: christian-draeger/increment-semantic-version@1.0.2
       with:
