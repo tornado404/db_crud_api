@@ -101,19 +101,16 @@ jobs:
         fi
         echo "next_version=null" >> $GITHUB_ENV
 
-    # 由于大版本号几乎不会变动,我们将大版本号设置为默认值,{major}.{minor}.{patch}.{micro_patch}
-#    - name: split cur_version, such as 1.4.3 becomes 4.3
-#      if: env.cur_version!='null'
-#      run: |
-
+    # 解析semantic版本号,{major}.{minor}.{patch}.{micro_patch}
     - name: Process version of the tag
+      if: env.cur_version!='null' && env.build_image_enabled=='true'
       id: version
       uses: ncipollo/semantic-version-action@v1
       with:
         tag: ${{ env.cur_version }}.${{ env.git_commits_since_tag }}
 
 
-    # 计算下一个版本号
+    # 计算下一个版本号.由于大版本号几乎不会变动,我们将大版本号设置为默认值,1.{minor}.{patch}.{micro_patch}
     - name: Bump release version
       if: env.cur_version!='null' && env.build_image_enabled=='true'
       id: bump_version
@@ -124,14 +121,16 @@ jobs:
         patch: ${{ steps.version.outputs.patch }}
         micro_patch: ${{ steps.version.outputs.micro_patch }}
       with:
-        current-version: ${{ env.major }}.${{ env.minor }}.${{ env.patch }}.${{ env.micro_patch }}
+        current-version: ${{ env.major }}.${{ env.minor }}.${{ env.patch }}-${{ env.version_fragment }}${{ env.micro_patch }}
         version-fragment: ${{ env.version_fragment }}
 
     # 打印下一个版本号
     - if: env.cur_version!='null' && env.build_image_enabled=='true'
       name: print next-version
+      env:
+        major: ${{ steps.version.outputs.major }}
       run: |
-        nextversion=${{ steps.bump_version.outputs.next-version }}
+        nextversion=${{ steps.version.outputs.major }}.${{ steps.bump_version.outputs.next-version }}
         echo "nextversion is [$nextversion]"
         echo "next_version=$nextversion" >> $GITHUB_ENV
 
