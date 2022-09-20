@@ -84,6 +84,17 @@ jobs:
         fi
 
 
+    - name: print cur_version
+      run: |
+        echo "cur_version is [${{ env.cur_version }}]"
+
+    - name: print cur_version2
+      env:
+        abc: ${{ env.cur_version }}
+      run: |
+        echo "cur_version is [${{ env.cur_version }}]"
+        echo "abc is [$abc]"
+
     - name: Bump release version
       if: env.cur_version!=0 && env.build_image_enabled=='true'
       id: bump_version
