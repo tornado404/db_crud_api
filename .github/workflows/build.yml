@@ -122,7 +122,7 @@ jobs:
         major: ${{ steps.version.outputs.major }}
         minor: ${{ steps.version.outputs.minor }}
         patch: ${{ steps.version.outputs.patch }}
-        micro_patch: ${{ steps.version.micro_patch.major }}
+        micro_patch: ${{ steps.version.outputs.micro_patch }}
       with:
         current-version: ${{ env.major }}.${{ env.minor }}.${{ env.patch }}.${{ env.micro_patch }}
         version-fragment: ${{ env.version_fragment }}
