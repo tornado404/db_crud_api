@@ -4,9 +4,6 @@ jobs:
   docker:
     name: build CI
     runs-on: ubuntu-latest
-    env:
-      BASE_REPO: zzc932
-      PF_SERVER: db_crud_api
 
     strategy:
       matrix:
@@ -101,6 +98,9 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          BASE_REPO: zzc932
+          PF_SERVER: db_crud_api
+
         run: |
           echo "tagname=null" >> $GITHUB_ENV
           current_branch=${{ env.cur_version }}
