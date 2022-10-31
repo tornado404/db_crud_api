@@ -2,15 +2,17 @@ on: [push, pull_request]
 name: Build
 jobs:
   docker:
+    name: build CI
+    runs-on: ubuntu-latest
     env:
       BASE_REPO: zzc932
       PF_SERVER: db_crud_api
+
     strategy:
       matrix:
         go-version: [1.18.x]
         goos: [linux]
         goarch: [amd64]
-    runs-on: ubuntu-latest
     steps:
       - name: Install go
         uses: actions/setup-go@v3
