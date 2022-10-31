@@ -41,7 +41,7 @@ jobs:
           # push
           echo "branch=${GITHUB_REF}"
           echo "branch=${GITHUB_REF_NAME}"
-#          refs/heads/
+          # refs/heads/
           echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
       # 1. 获取当前分支tag信息
