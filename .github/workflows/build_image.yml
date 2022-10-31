@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: Build
+name: BuildImage
 env:
   BASE_REPO: zzc932
   PF_SERVER: db_crud_api
