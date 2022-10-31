@@ -46,6 +46,11 @@ jobs:
           echo "tag=${{ steps.branch-name.outputs.tag }}"
           echo "当前分支为 ${{ steps.branch-name.outputs.base_ref_branch }}"
 
+      - id: get_branch_name
+        run: |
+          echo "{branch}={${GITHUB_BASE_REF}}"
+          echo "{branch}={${GITHUB_BASE_REF}}" >> $GITHUB_OUTPUT
+
 
       # 2. 获取commit hash
       - id: commit
@@ -59,7 +64,7 @@ jobs:
       #  当前仅构建Release分支,若要放开,则改为if [[ $current_branch =~ ^(release|dev|master|main).* ]];then
       - name: get build-image-enabled, version-fragment and current-version
         run: |
-          current_branch=${{ steps.branch-name.outputs.base_ref_branch }}
+          current_branch=${{ steps.get_branch_name.outputs.branch }}
           echo "current_branch is [$current_branch]"
           event_name=${{ github.event_name }}
           build_image_enabled=false
