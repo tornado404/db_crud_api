@@ -48,10 +48,15 @@ jobs:
 
       - id: get_branch_name
         run: |
+          BRANCH=$(echo ${GITHUB_REF} | sed -e "s/refs\/heads\///g")
+
+          echo "{branch}={${GITHUB_BASE_REF}}"
+          echo "{branch}={${GITHUB_BASE_REF}}" >> $GITHUB_OUTPUT
           echo "{branch}={${GITHUB_HEAD_REF}}"
-          echo "{branch}={${GITHUB_REF}}"
           echo "{branch}={${GITHUB_HEAD_REF}}" >> $GITHUB_OUTPUT
+          echo "{branch}={${GITHUB_REF}}"
           echo "{branch}={${GITHUB_REF}}" >> $GITHUB_OUTPUT
+
 
       # 2. 获取commit hash
       - id: commit
