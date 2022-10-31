@@ -33,16 +33,13 @@ jobs:
 
       # 0. 获取当前分支branch_name信息
       - id: get_branch_name
+        name: get branch name
         run: |
+          echo "branch=${GITHUB_HEAD_REF}"
           echo "branch=${GITHUB_BASE_REF}"
-          echo "branch=${GITHUB_BASE_REF}" >> $GITHUB_OUTPUT
-          if [[ $current_branch =~ ^(release|dev|master|main).* ]];then
-            echo "current_branch is [$current_branch]"
-            if [[ $event_name == 'push' ]]; then
-            echo "event_name is [$event_name]"
-            build_image_enabled=true
-            fi
-          fi
+          echo "branch=${GITHUB_REF}"
+
+          echo "branch=${GITHUB_REF}" >> $GITHUB_OUTPUT
 
       # 1. 获取当前分支tag信息
       - id: branch-name
@@ -71,17 +68,21 @@ jobs:
       #  当前仅构建Release分支,若要放开,则改为if [[ $current_branch =~ ^(release|dev|master|main).* ]];then
       - name: get build-image-enabled, version-fragment and current-version
         run: |
+          build_image_enabled=false
+          event_name=${{ github.event_name }}
+          if [[ $event_name != 'push' ]]; then
+            echo "build_image_enabled=$build_image_enabled" >> $GITHUB_ENV
+            exit 0
+          fi
           current_branch=${{ steps.get_branch_name.outputs.branch }}
           echo "current_branch is [$current_branch]"
-          event_name=${{ github.event_name }}
-          build_image_enabled=false
+
 
           if [[ $current_branch =~ ^(release|dev|master|main).* ]];then
             echo "current_branch is [$current_branch]"
-            if [[ $event_name == 'push' ]]; then
             echo "event_name is [$event_name]"
             build_image_enabled=true
-            fi
+
           fi
           echo "打印build_image_enabled值 [$build_image_enabled] 并存储到环境变量"
           echo "build_image_enabled=$build_image_enabled" >> $GITHUB_ENV
