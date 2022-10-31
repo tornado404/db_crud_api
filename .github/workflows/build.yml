@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: Build
+name: BuildAndPush
 env:
   BASE_REPO: zzc932
   PF_SERVER: db_crud_api
@@ -31,6 +31,19 @@ jobs:
           name: paddleflow-${{ matrix.goos }}-${{ matrix.goarch }}
           path: paddleflow-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
 
+      # 0. 获取当前分支branch_name信息
+      - id: get_branch_name
+        run: |
+          echo "branch=${GITHUB_BASE_REF}"
+          echo "branch=${GITHUB_BASE_REF}" >> $GITHUB_OUTPUT
+          if [[ $current_branch =~ ^(release|dev|master|main).* ]];then
+            echo "current_branch is [$current_branch]"
+            if [[ $event_name == 'push' ]]; then
+            echo "event_name is [$event_name]"
+            build_image_enabled=true
+            fi
+          fi
+
       # 1. 获取当前分支tag信息
       - id: branch-name
         name: Get branch name
@@ -45,12 +58,6 @@ jobs:
           echo "is_tag=${{ steps.branch-name.outputs.is_tag }}"
           echo "tag=${{ steps.branch-name.outputs.tag }}"
           echo "当前分支为 ${{ steps.branch-name.outputs.base_ref_branch }}"
-
-      - id: get_branch_name
-        run: |
-          echo "{branch}={${GITHUB_BASE_REF}}"
-          echo "{branch}={${GITHUB_BASE_REF}}" >> $GITHUB_OUTPUT
-
 
       # 2. 获取commit hash
       - id: commit
