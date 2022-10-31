@@ -33,6 +33,7 @@ jobs:
 
       # 0. 获取当前分支branch_name信息
       - id: get_branch_name
+        name: get branch name
         run: |
           echo "branch=${GITHUB_HEAD_REF}"
           echo "branch=${GITHUB_BASE_REF}"
@@ -71,7 +72,7 @@ jobs:
           event_name=${{ github.event_name }}
           if [[ $event_name != 'push' ]]; then
             echo "build_image_enabled=$build_image_enabled" >> $GITHUB_ENV
-            exit 1
+            exit 0
           fi
           current_branch=${{ steps.get_branch_name.outputs.branch }}
           echo "current_branch is [$current_branch]"
